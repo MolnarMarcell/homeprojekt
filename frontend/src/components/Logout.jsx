@@ -1,28 +1,55 @@
-import api from '../api/axiosInstance';
-import { useEffect, useState } from 'react';
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../api/axiosInstance'
 
 export default function Logout() {
-    const [message, setMessage] = useState(null);
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate()
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await api.get('/users/logout');
-                setMessage(response.data);
-                console.log('Logout endpoint response:', response.data);
-            } catch (error) {
-                console.error('Error fetching logout data:', error);
-                setMessage('Hiba történt a kijelentkezés során');
-            }
-        }
+  async function handleLogout() {
+    setError('')
+    setIsSubmitting(true)
 
-        fetchData();
-    }, []);
+    try {
+      await api.post('/users/logout')
+      navigate('/', {
+        replace: true,
+        state: { notice: 'Sikeresen kijelentkeztél.' },
+      })
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.error ||
+          'Nem sikerült kijelentkezni. Próbáld meg újra.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-    return (
-        <>
-            <h1>Logout</h1>
-            <p>{JSON.stringify(message)}</p>
-        </>
-    );
+  return (
+    <section className="page-section">
+      <div className="auth-card">
+        <h1>Kijelentkezés</h1>
+        {error && (
+          <p className="form-message form-message-error" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="logout-actions">
+          <button
+            className="button button-primary"
+            disabled={isSubmitting}
+            onClick={handleLogout}
+            type="button"
+          >
+            {isSubmitting ? 'Kijelentkezés…' : 'Kijelentkezem'}
+          </button>
+          <Link className="button button-secondary" to="/">
+            Mégsem
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
 }

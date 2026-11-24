@@ -36,8 +36,8 @@ const UserController = {
         if (!email || !password || !name) {
             return res.status(400).json({ error: 'Az email, a jelszó és a név megadása kötelező' });
         }
-        const hashedPassword = await bcrypt.hash(password, 10); // Jelszó hash-elése
         try {
+            const hashedPassword = await bcrypt.hash(password, 10); // Jelszó hash-elése
             const newUser = await userModel.create({ email, password: hashedPassword, name, phone, profileimage });
             const { password: _password, ...safeUser } = newUser;
             res.status(201).json(safeUser);
