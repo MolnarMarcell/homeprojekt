@@ -1,0 +1,38 @@
+/*
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+*/
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import { fileURLToPath } from 'url';
+import 'dotenv/config';
+import cors from 'cors';
+import multer from 'multer';
+
+import indexRouter from './routes/index.js';
+import usersRouter from './routes/users.js';
+
+var app = express();
+
+app.use(cors({
+    origin: true, // Engedélyezi minden domain számára
+    credentials: true // Engedélyezi a hitelesítő adatok küldését Cookie-kel (pl. a refresh token)
+}));
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', indexRouter);
+app.use('/', usersRouter);
+app.use('/users', usersRouter);
+
+export default app;
